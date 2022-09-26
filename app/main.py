@@ -25,4 +25,4 @@ app.include_router(vote.router)
 
 @app.get("/")
 def home():
-    return {"message": "Hello everybody"}
+    return {"message": "Hello World"}

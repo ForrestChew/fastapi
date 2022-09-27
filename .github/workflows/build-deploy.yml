@@ -3,14 +3,16 @@ on: [push, pull_request]
 
 jobs:
   job1:
+    environment:
+      name: Testing
     env:
-      POSTGRES_HOST: localhost:5432
-      POSTGRES_DATABASE: fastapi
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: test
-      JOSE_JWT_SECRET_KEY: 09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
-      ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 300
+      POSTGRES_HOST: ${{secrets.POSTGRES_HOST}}
+      POSTGRES_DATABASE: ${{secrets.POSTGRES_DATABASE}}
+      POSTGRES_USER: ${{POSTGRES_USER}}
+      POSTGRES_PASSWORD: ${{POSTGRES_PASSWORD}}
+      JOSE_JWT_SECRET_KEY: ${{JOSE_JWT_SECRET_KKEY}}
+      ALGORITHM: ${{ALGORITHM}}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ACCESS_TOKEN_EXPIRE_MINUTES}}
     runs-on: ubuntu-latest
     steps:
       - name: pulling git repo

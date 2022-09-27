@@ -18,8 +18,8 @@ jobs:
       postgres:
         image: postgres
         env:
-        POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
-        POSTGRES_DB: ${{secrets.POSTGRES_DATABASE}}_test
+          POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
+          POSTGRES_DB: ${{secrets.POSTGRES_DATABASE}}_test
       ports:
         - 5432:5432
       options: >-

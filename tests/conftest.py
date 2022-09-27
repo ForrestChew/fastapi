@@ -5,6 +5,7 @@ from app.oauth2 import create_access_token
 from app.main import app
 from app.database import get_db, Base
 from app.config import settings
+from app import models
 import pytest
 
 
@@ -17,7 +18,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 client = TestClient(app)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def session():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -28,9 +29,10 @@ def session():
         db.close()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def client(session):
     def override_get_db():
+
         try:
             yield session
         finally:
@@ -43,6 +45,16 @@ def client(session):
 @pytest.fixture
 def test_user(client):
     user_data = {"email": "saulgoodman@speedyjustice4u.com", "password": "ethics"}
+    res = client.post("/users/", json=user_data)
+    assert res.status_code == 201
+    new_user = res.json()
+    new_user["password"] = user_data["password"]
+    return new_user
+
+
+@pytest.fixture
+def test_user2(client):
+    user_data = {"email": "saulgoodman1@speedyjustice4u.com", "password": "ethics1"}
     res = client.post("/users/", json=user_data)
     assert res.status_code == 201
     new_user = res.json()
@@ -78,3 +90,39 @@ def authorized_client(client, token):
     client.headers = {**client.headers, "Authorization": f"Bearer {token}"}
 
     return client
+
+
+@pytest.fixture
+def test_posts(test_user, test_user2, session):
+    posts_data = [
+        {
+            "title": "Best Beaches",
+            "content": "Ocean, Sammy, Cliff",
+            "owner_id": test_user["id"],
+        },
+        {
+            "title": "Who is the Governor",
+            "content": "Many of our subscribers have been wondering, Whos is the Governor really?",
+            "owner_id": test_user["id"],
+        },
+        {
+            "title": "Woof",
+            "content": "Wood, woof, wood, wood, etc...",
+            "owner_id": test_user["id"],
+        },
+        {
+            "title": "Meow",
+            "content": "cat sounds, Meow, more cat sounds, etc...",
+            "owner_id": test_user2["id"],
+        },
+    ]
+
+    def create_post_model(post):
+        return models.Post(**post)
+
+    post_map = map(create_post_model, posts_data)
+    posts = list(post_map)
+    session.add_all(posts)
+    session.commit()
+    posts = session.query(models.Post).all()
+    return posts
